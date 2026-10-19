@@ -1,6 +1,6 @@
 cask "simreel" do
-  version "0.2.0"
-  sha256 "5a7295aa6e6f1e21abc6c1214d28086c5ada778d67c8f5422468050c6d7c6005"
+  version "0.2.1"
+  sha256 "1cb95811317b20d214a5ba8b358af8c0791bf9087580d5e3388a9bb003cf711f"
 
   url "https://github.com/SolankiYogesh/simreel/releases/download/v#{version}/SimReel-#{version}-arm64.dmg"
   name "SimReel"
