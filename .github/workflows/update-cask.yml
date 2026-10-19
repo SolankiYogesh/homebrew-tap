@@ -1,0 +1,37 @@
+name: Update SimReel cask
+
+# Keeps Casks/simreel.rb on the latest SimReel release.
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update the cask to the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="$(gh api repos/SolankiYogesh/simreel/releases/latest --jq .tag_name)"
+          VERSION="${TAG#v}"
+          CURRENT="$(sed -n 's/^  version "\(.*\)"/\1/p' Casks/simreel.rb)"
+          if [ "$VERSION" = "$CURRENT" ]; then
+            echo "Already on $VERSION"
+            exit 0
+          fi
+          SUMS="$(curl -fsSL "https://github.com/SolankiYogesh/simreel/releases/download/${TAG}/SHA256SUMS.txt")"
+          SHA="$(echo "$SUMS" | awk -v f="SimReel-${VERSION}-arm64.dmg" '$2 == f { print $1 }')"
+          test -n "$SHA"
+          sed -i "s/^  version \".*\"/  version \"${VERSION}\"/; s/^  sha256 \".*\"/  sha256 \"${SHA}\"/" Casks/simreel.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "simreel ${VERSION}"
+          git push
